@@ -1,38 +1,58 @@
-select
-CONVERT(char(10), f.Fecha, 103) as [date_sales],
-p.ID as producto_id,
-sum(dt.Cantidad) as Cantidad,
-sum(dt.Total) as total
-from 
-VEN_FACTURAS f inner join VEN_FACTURAS_DT  dt on f.ID = dt.FacturaID inner join 
-INV_PRODUCTOS p on dt.ProductoID = p.ID
-where f.Anulado = 0
-group by f.Fecha, p.id
+SELECT
+    CONVERT(CHAR(10), f.Fecha, 103) AS sale_date,
+    p.ID AS product_id,
+    SUM(dt.Cantidad) AS quantity,
+    SUM(dt.Total) AS total_amount
+FROM VEN_FACTURAS f
+INNER JOIN VEN_FACTURAS_DT dt ON f.ID = dt.FacturaID
+INNER JOIN INV_PRODUCTOS p ON dt.ProductoID = p.ID
+WHERE f.Anulado = 0
+GROUP BY CONVERT(CHAR(10), f.Fecha, 103), p.ID
 
-select 
-CONVERT(char(10), c.Fecha, 103) as [date_compra],
-p.ID as producto_id,
-ac.Nombre as proveedor,
-dt.Cantidad,
-dt.Total
-from 
-COM_FACTURAS c inner join COM_FACTURAS_DT dt on c.ID = dt.FacturaID inner join 
-INV_PRODUCTOS p on p.ID = dt.ProductoID inner join ACR_ACREEDORES ac on c.ProveedorID = ac.ID
-where c.Anulado = 0 and YEAR(c.Fecha) > 2023
-group by c.Fecha,c.id,p.id,ac.Nombre,dt.Cantidad,dt.Total
-order by producto_id
+==========================================================
 
-select 
-p.ID as producto_id,
-p.Código as code,
-p.Nombre as name,
-ISNULL( SUM( CASE cd.Egreso WHEN 1 THEN ROUND(-Cantidad,2) ELSE ROUND(Cantidad,2) END ), 0 ) as stock,
-p.Conversión
-from
-INV_PRODUCTOS p inner join INV_PRODUCTOS_CARDEX cd on p.ID = cd.ProductoID
-where p.Anulado = 0 and cd.Anulado = 0 and cd.BodegaID = '0000000001' 
-group by p.Código,p.Nombre,p.Conversión,p.ID
+SELECT
+    CONVERT(CHAR(10), c.Fecha, 103) AS purchase_date,
+    p.ID AS product_id,
+    ac.Nombre AS supplier_name,
+    dt.Cantidad AS quantity_purchased,
+    dt.Total AS total_amount
+FROM COM_FACTURAS c
+INNER JOIN COM_FACTURAS_DT dt ON c.ID = dt.FacturaID
+INNER JOIN INV_PRODUCTOS p ON p.ID = dt.ProductoID
+INNER JOIN ACR_ACREEDORES ac ON c.ProveedorID = ac.ID
+WHERE c.Anulado = 0
+  AND YEAR(c.Fecha) > 2023
+GROUP BY CONVERT(CHAR(10), c.Fecha, 103), p.ID, ac.Nombre, dt.Cantidad, dt.Total
+ORDER BY product_id;
 
+==============================================================================
+
+SELECT 
+    p.ID AS product_id,
+    p.Código AS product_code,
+    p.Nombre AS product_name,
+    ISNULL(
+        SUM(
+            CASE 
+                WHEN cd.Egreso = 1 THEN ROUND(-cd.Cantidad, 2)
+                ELSE ROUND(cd.Cantidad, 2)
+            END
+        ), 
+    0) AS current_stock,
+    p.Conversión AS unit_conversion
+FROM INV_PRODUCTOS p
+INNER JOIN INV_PRODUCTOS_CARDEX cd ON p.ID = cd.ProductoID
+WHERE 
+    p.Anulado = 0 
+    AND cd.Anulado = 0 
+    AND cd.BodegaID = '0000000001'
+GROUP BY 
+    p.ID, p.Código, p.Nombre, p.Conversión
+ORDER BY 
+    product_id;
+
+=======================================================================
 
 select 
 Id,
