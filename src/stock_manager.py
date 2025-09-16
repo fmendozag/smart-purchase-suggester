@@ -1,7 +1,7 @@
 import pandas as pd
 from datetime import datetime, timedelta
 
-def calculate_min_stock(sales: pd.DataFrame, days: int = 3) -> pd.DataFrame:
+def calculate_min_stock(sales: pd.DataFrame, coverage_days: int = 3) -> pd.DataFrame:
     """Calcula stock mínimo dinámico para cubrir X días de demanda, usando solo los últimos 2 meses de ventas."""
     
     # Asegurarse de que sale_date sea datetime
@@ -18,7 +18,7 @@ def calculate_min_stock(sales: pd.DataFrame, days: int = 3) -> pd.DataFrame:
     avg_daily = recent_sales.groupby("product_id")["quantity"].mean().reset_index()
     
     # Calcular stock mínimo
-    avg_daily["min_stock"] = avg_daily["quantity"] * days
+    avg_daily["min_stock"] = avg_daily["quantity"] * coverage_days
     
     return avg_daily[["product_id", "min_stock"]]
 

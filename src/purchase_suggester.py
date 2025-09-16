@@ -1,10 +1,11 @@
 import pandas as pd
 import math
+from .stock_manager import calculate_min_stock
 
 def suggest_purchases(
     forecast_df: pd.DataFrame, 
     stock_dict: dict, 
-    days_to_cover: int = 7, 
+    coverage_days: int = 7, 
     box_size: int = None
 ) -> pd.DataFrame:
     """
@@ -32,8 +33,7 @@ def suggest_purchases(
         daily_forecast = row["forecast"]
 
         # Unidades que necesito en el periodo
-        needed = daily_forecast * days_to_cover
-
+        needed = daily_forecast * coverage_days
         # Stock actual (si no está en dict → 0)
         stock = stock_dict.get(pid, 0)
 
@@ -53,4 +53,25 @@ def suggest_purchases(
         })
 
     return pd.DataFrame(results)
- 
+
+
+def generate_purchase_suggestion(sales: pd.DataFrame, stock: pd.DataFrame, coverage_days: int = 7) -> pd.DataFrame:
+    """
+    Genera sugerencias de compra en base al stock mínimo requerido vs. stock actual.
+    Usa el cálculo dinámico de min_stock de los últimos 2 meses.
+    """
+
+    # 1. Calcular stock mínimo requerido dinámicamente
+    min_stock_df = calculate_min_stock(sales, coverage_days)
+
+    # 2. Unir con stock actual
+    merged = min_stock_df.merge(stock, on="product_id", how="left")
+
+    # Asegurarse de que la columna de stock actual exista
+    if "current_stock" not in merged.columns:
+        merged["current_stock"] = 0  
+
+    # 3. Calcular sugerido
+    merged["suggested_purchase"] = (merged["min_stock"] - merged["current_stock"]).clip(lower=0)
+
+    return merged[["product_id", "current_stock", "min_stock", "suggested_purchase"]]
