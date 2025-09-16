@@ -13,11 +13,18 @@ def select_suppliers(purchases: pd.DataFrame) -> pd.DataFrame:
     -------
     DataFrame con ['product_id','best_supplier','best_cost']
     """
-    purchases["purchase_date"] = pd.to_datetime(purchases["purchase_date"])
-    cutoff = purchases["purchase_date"].max() - pd.Timedelta(days=30)
+    purchases = purchases.copy()
+    purchases["purchase_date"] = pd.to_datetime(purchases["purchase_date"], errors='coerce')
+    purchases["product_id"] = purchases["product_id"].astype(str).str.zfill(10)
+    
+    purchases = purchases[purchases["quantity_purchased"] > 0].copy()
+    purchases['unit_cost'] = purchases['total_amount'] / purchases['quantity_purchased']
+    
+    cutoff = purchases["purchase_date"].max() - pd.Timedelta(days=30) 
     
     recent = purchases[purchases["purchase_date"] >= cutoff].copy()
-    recent['unit_cost'] = recent['total_amount'] / recent['quantity_purchased']
+    
+    #recent['unit_cost'] = recent['total_amount'] / recent['quantity_purchased']
 
     if not recent.empty:
         best = recent.sort_values(["product_id","unit_cost"]).drop_duplicates("product_id", keep="first")
