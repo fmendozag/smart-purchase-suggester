@@ -98,6 +98,8 @@ def generate_purchase_suggestion(
     # 10) informar si hay productos sin proveedor
     display_df['best_supplier'] = display_df['best_supplier'].fillna("UNKNOWN")
     display_df['best_cost'] = display_df['best_cost'].apply(lambda x: f"{x:.2f}" if pd.notnull(x) else "")
+    
+    display_df =  display_df[display_df['suggested_purchase'] > 0].reset_index(drop=True)
 
     return display_df
 

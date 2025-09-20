@@ -22,7 +22,7 @@ INNER JOIN COM_FACTURAS_DT dt ON c.ID = dt.FacturaID
 INNER JOIN INV_PRODUCTOS p ON p.ID = dt.ProductoID
 INNER JOIN ACR_ACREEDORES ac ON c.ProveedorID = ac.ID
 WHERE c.Anulado = 0
-  AND YEAR(c.Fecha) > 2023
+  AND YEAR(c.Fecha) > 2022
 GROUP BY CONVERT(CHAR(10), c.Fecha, 103), p.ID, ac.Nombre, dt.Cantidad, dt.Total
 ORDER BY product_id;
 
