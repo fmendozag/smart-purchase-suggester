@@ -29,6 +29,13 @@ ORDER BY product_id;
 ==============================================================================
 
 SELECT 
+    product_id,
+    product_code,
+    product_name,
+    unit_conversion,
+    SUM(current_stock) AS current_stock
+FROM (
+SELECT 
     p.ID AS product_id,
     p.Código AS product_code,
     p.Nombre AS product_name,
@@ -49,18 +56,43 @@ WHERE
     AND cd.BodegaID = '0000000001'
 GROUP BY 
     p.ID, p.Código, p.Nombre, p.Conversión
+
+UNION ALL
+
+SELECT 
+    p.ID AS product_id,
+    p.Código AS product_code,
+    p.Nombre AS product_name,
+    ISNULL(
+        SUM(
+            CASE 
+                WHEN cd.Egreso = 1 THEN ROUND(-cd.Cantidad, 2)
+                ELSE ROUND(cd.Cantidad, 2)
+            END
+        ), 
+    0) AS current_stock,
+    p.Conversión AS unit_conversion
+FROM [192.168.160.5].BELBRY.dbo.INV_PRODUCTOS p
+INNER JOIN [192.168.160.5].BELBRY.dbo.INV_PRODUCTOS_CARDEX cd ON p.ID = cd.ProductoID
+WHERE 
+    p.Anulado = 0 
+    AND cd.Anulado = 0 
+    AND cd.BodegaID = '0000000011'
+GROUP BY 
+    p.ID, p.Código, p.Nombre, p.Conversión
+) AS UNION_RESULT
+GROUP BY
+product_id,
+    product_code,
+    product_name,
+    unit_conversion
 ORDER BY 
-    product_id;
+    product_id
 
-=======================================================================
-
+=====================================================================================
 select 
-Id,
-CreadoDate AS [Date],
-Detalle,
-case 
-when SucursalID = 00 then 'MATRIZ'
-when SucursalID = 01 then 'DESEO'
-when SucursalID = 02 then 'MARISCAL'
-end AS SUCURSAL,
-Total from VEN_FACTURAS where Anulado = 0 and year(Fecha) = 2025
+ProductoID as  product_id,
+Nombre as name,
+Factor as unit_conversion
+from 
+INV_PRODUCTOS_EMPAQUES
