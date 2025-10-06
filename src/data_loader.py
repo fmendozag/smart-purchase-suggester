@@ -32,4 +32,12 @@ def load_products(path:str) -> pd.DataFrame:
                      names=['product_id','product_code','product_name','current_stock','unit_conversion'])
     df['product_id'] = df['product_id'].astype(str).str.zfill(10)    
     return df
+def load_packaging(path:str) -> pd.DataFrame:
+    df = pd.read_csv(path,
+                     sep=';',
+                     header=None,
+                     names=['product_id','name','unit_conversion'])
+    df['product_id'] = df['product_id'].astype(str).str.zfill(10)    
+    
+    return df
 
