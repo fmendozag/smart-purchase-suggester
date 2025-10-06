@@ -51,7 +51,7 @@ The system performs a complete analysis to determine **optimal purchase quantiti
 ---
 
 ## 🧩 Project Structure
-
+```txt
 smart-purchase-suggester/
 ├── data/
 │   ├── packaging.csv
@@ -69,3 +69,4 @@ smart-purchase-suggester/
 │   └── supplier_selector.py
 ├── README.md
 └── requirements.txt
+```
