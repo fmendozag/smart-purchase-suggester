@@ -1,32 +1,26 @@
 import pandas as pd
-import pyodbc
+import urllib
 from sqlalchemy import create_engine
 
-# === Conexión SQL Server ===
-def get_sql_connection():
-    # Ajusta con tus credenciales reales
-    conn_str = (
-        "DRIVER={ODBC Driver 17 for SQL Server};"
-        "SERVER=192.168.150.78;"     # Ej: "192.168.160.10" o "localhost\\SQLEXPRESS"
-        "DATABASE=BELBRY;"     # Ej: "MIBASE"
-        "UID=belbry;"             # Usuario SQL
-        "PWD=Sup3RM3rC@d0sB&B;"            # Contraseña
-        "TrustServerCertificate=yes;"
-    )
-    return pyodbc.connect(conn_str)
 
 def get_sqlalchemy_engine():
-    username = "belbry"
-    password = "Sup3RM3rC@d0sB&B"
-    server = "192.168.150.78"
-    database = "BELBRY"
     driver = "ODBC Driver 17 for SQL Server"
+    server = "ServerName"
+    database = "DataBaseName"
+    username = "YourUser"
+    password = "YourPassword"
 
-    connection_string = (
-        f"mssql+pyodbc://{username}:{password}@{server}/{database}"
-        f"?driver={driver.replace(' ', '+')}&TrustServerCertificate=yes"
+    # Parámetros ODBC codificados correctamente
+    params = urllib.parse.quote_plus(
+        f"DRIVER={driver};"
+        f"SERVER={server};"
+        f"DATABASE={database};"
+        f"UID={username};"
+        f"PWD={password};"
+        f"TrustServerCertificate=Yes;"
     )
-    
+
+    connection_string = f"mssql+pyodbc:///?odbc_connect={params}"
     return create_engine(connection_string)
 
 

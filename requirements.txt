@@ -1,0 +1,7 @@
+numpy==2.3.3
+openpyxl==3.1.5
+pandas==2.3.3
+scikit_learn==1.7.2
+SQLAlchemy==2.0.37
+ipywidgets==8.1.7
+ipython==8.12.3
